@@ -15,6 +15,14 @@ public class Searching {
 			.filter(Dish::isVegetarian)
 			.findAny() // Optional<Dish> 반환
 			.ifPresent(dish -> System.out.println(dish.getName()));
+		
+		List<Integer> nums = Arrays.asList(1, 3, 5);
+		Integer num = nums.stream()
+						.filter(n -> n % 2 == 0)
+						.findFirst()
+						.orElse(2); // 값이 존재하지 않아 2 반환
+		
+		System.out.println(num);
 	}
 	
 	public List<Dish> getDishList() {
