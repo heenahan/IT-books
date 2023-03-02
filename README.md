@@ -1,9 +1,7 @@
-# modern-java-in-action
+# IT books
 ---
-> 모던 자바 인 액션을 읽고 정리하였습니다
+> IT 서적을 읽고 정리
 
-## 목차
-1. [자바 8, 9, 10, 11 : 무슨 일이 일어나고 있는가?](https://github.com/heenahan/modern-java-in-action/tree/main/src/chap01)
-2. [동적 파라미터화 코드 전달하기](https://github.com/heenahan/modern-java-in-action/tree/main/src/chap02)
-3. [람다 표현식](https://github.com/heenahan/modern-java-in-action/tree/main/src/chap03)
-4. [스트림 소개](https://github.com/heenahan/modern-java-in-action/tree/main/src/chap04)
+## 서적 목록
+- [모던 자바 인 액션](https://github.com/heenahan/IT-books/tree/main/src/modern_java_in_action)
+- [헤드퍼스트 디자인 패턴](https://github.com/heenahan/IT-books/tree/main/src/head_first_design_patterns) 
