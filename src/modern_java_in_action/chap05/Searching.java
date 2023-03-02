@@ -1,9 +1,9 @@
-package chap05;
+package modern_java_in_action.chap05;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static chap05.Dish.Type.*;
+import static modern_java_in_action.chap05.Dish.Type.*;
 
 public class Searching {
 	

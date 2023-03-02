@@ -1,4 +1,4 @@
-package chap05.problem;
+package modern_java_in_action.chap05.problem;
 
 public class Transaction {
 	private final Trader trader;

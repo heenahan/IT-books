@@ -1,10 +1,10 @@
-package chap04;
+package modern_java_in_action.chap04;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static chap04.Dish.Type.*;
+import static modern_java_in_action.chap04.Dish.Type.*;
 import static java.util.stream.Collectors.*;
 
 public class Main {

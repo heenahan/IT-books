@@ -1,4 +1,4 @@
-package chap05;
+package modern_java_in_action.chap05;
 
 import java.util.Arrays;
 import java.util.List;

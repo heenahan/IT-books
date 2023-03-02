@@ -1,23 +1,23 @@
-package chap05;
+package modern_java_in_action.chap05;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static chap05.Dish.Type.*;
-import static java.util.stream.Collectors.toList;
+import static modern_java_in_action.chap05.Dish.Type.*;
 
-public class Filtering {
+public class Reducing {
 	
 	public static void main(String[] args) {
-		Filtering T = new Filtering();
-		// 고기 요리 두 개만 반환
+		Reducing T = new Reducing();
 		List<Dish> menu = T.getDishList();
-		List<Dish> twoMeatDish = menu.stream()
-				.filter(dish -> MEAT.equals(dish.getType()))
-				.limit(2)
-				.collect(toList());
 		
-		System.out.println(twoMeatDish);
+		// map과 reduce를 사용하여 요리 개수 구하기
+		int count = menu.stream().map(dish -> 1).reduce(0, (x, y) -> x + y);
+		
+		long count2 = menu.stream().count();
+		
+		System.out.println(count);
+		System.out.println(count2);
 	}
 	
 	public List<Dish> getDishList() {

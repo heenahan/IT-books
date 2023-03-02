@@ -264,6 +264,157 @@ map, filter 등은 입력 스트림에서 각 요소를 받아 결과를 출력 
 앞선 예제에서 int 또는 double로 내부 상태로 사용했다.
 스트림에서 처리하는 요소의 수와 상관없이 **내부 상태의 크기는 한정(bound)** 되어 있다.
 
-그리고 sorted와 distinct 같은 연산은 스트림의 요소를 정렬하거나 중복을 제거하려면 과거의 이력을 알고 있어야 한다.
+그리고 sorted와 distinct 같은 연산은 스트림의 요소를 정렬하거나 중복을 제거하려면 **과거의 이력을 알고 있어야 한다.**
 결국 **모든 요소가 버퍼에 추가되어 있어야 하고** 따라서 데이터의 스트림의 크기가 크거나 무한이라면 문제가 생길 수 있다.
 이러한 연산을 **내부 상태를 갖는 연산**이라고 한다.
+
+😅 여담
+
+사실 이 부분이 아무리 읽어도 이해가 가지 않았다. 
+하지만 뒷부분을 읽을수록 조금씩 이해가 된다.
+상태가 있음과 없음을 판단하는 기준은 "과거의 이력을 알고 있어야 한다" 이것이다. 
+
+n번째 요소까지의 합을 계산하려면 n - 1번째 요소의 합을 알아야 한다.
+n개의 요소를 정렬하려면 1부터 n번째 수가 무엇인지 알아야 한다.
+이러한 연산들이 상태가 있는 연산이다.
+참고도 뒤에서 예시가 계속 나온다.
+
+## 6. 숫자형 스트림
+### 6.1. 기본형 특화 스트림
+reduce 메서드를 이용해 칼로리의 합을 구하는 코드는 다음과 같다.
+```java
+int calories = 
+        menu.stream()
+            .map(Dish::getCalories)
+            .reduce(0, Integer::sum);
+```
+위 코드는 내부적으로 합계를 계산하기 전에 Integer을 기본형으로 언박싱해야 하므로 박싱 비용이 발생한다.
+그리고 map 메서드가 Stream<T\>를 생성하므로 sum 메서드를 직접 호출할 수 없다.
+
+스트림 API는 박싱 비용을 피할 수 있도록 숫자 스트림을 효율적으로 처리하는 **기본형 특화 스트림**을 제공한다.
+
+스트림을 특화 스트림으로 변환할 때는 mapToInt, mapToDouble, mapToLong 세 가지 메서드를 가장 많이 사용한다.
+map과 정확히 같은 기능을 수행하지만 Stream<T\>대신 특화 스트림(IntStream, DoubleStream, LongStream)을 반환한다.
+
+IntStream은 sum, max, min, average 등 다양한 유틸리티 메서드를 지원한다. 
+여기서 sum을 살펴보자면 sum은 스트림이 비어있으면 기본값 0을 반환한다.  
+
+반대로 boxed 메서드를 이용해서 특화 스트림을 객체 스트림으로 변환할 수 있다.
+```java
+IntStream intStream = menu.stream().mapToInt(Dish::getCalories); 
+Stream<Integer> stream = intStream.boxed();
+```
+### 6.2. Optional 기본형
+4.4에서 값이 존재하는지 여부를 가리킬 수 있는 컨테이너 클래스 Optional이 등장했다.
+OptionalInt, OptionalDouble, OptionalLong 세 가지 기본형 특화 버전도 있다.
+
+앞에서 IntStream의 sum은 스트림에 요소가 없을 때 기본값 0을 반환했다.
+하지만 IntStream에서 최댓값을 찾을 때 0이라는 기본값 때문에 잘못된 결과가 도출될 수 있다.
+바로 스트림에 요소가 없는 경우와 실제 최댓값이 0인 상황을 구분할 수 없다는 점이다.
+
+따라서 max 메서드는 OptionalInt를 반환한다. 
+그리고 OptionalInt를 이용해서 최댓값이 없는 상황에 사용할 기본값을 명시적으로 정의할 수 있다. 
+```java
+OptionalInt maxCalories = menu.stream()
+                        .maxToInt(Dish::getCalories)
+                        .max();
+
+int max = maxCalories.orElse(1); // 값이 없을 경우 1 반환
+```
+
+### 6.3. 숫자 범위
+자바 8의 IntStream과 LongStream에서는 range와 rangeClosed라는 두 가지 정적 메서드를 제공한다.
+두 메서드는 특정 범위의 숫자를 이용해야 하는 상황에서 사용한다.
+
+두 메서드 모두 첫 번째 인수로 시작값을 두 번째 인수로 종료값을 가진다.
+
+**range**는 시작값은 포함되지만 종료값은 결과에 포함되지 않는다.
+반면에 **rangeClosed**는 시작값과 종료값이 결과에 포함된다는 점이 다르다.
+
+🙄 **여담**
+
+책에서는 range는 시작값과 종료값 모두 결과에 포함되지 않는다고 적혀있었다.
+그런데 자바는 range(startInclusive, endExclusive)라고 말한다.
+그러면 시작값은 포함이고 종료값은 포함이 아니다. 이런, 내가 독해력이 부족한건지 책이 잘못된건지..
+
+## 7. 다양한 스트림 만들기
+### 7.1. 값, 배열, 파일을 이용한 스트림
+- 값으로 스트림 만들기
+  임의의 수를 인수로 받는 정적 메서드 **Stream.of**를 이용해서 스트림을 만들 수 있다.
+  그리고 empty 메서드를 이용해서 스트림을 비울 수 있다.
+  ```java
+  Stream<String> stream = Stream.of("Modern", "Java", "In", "Action"); // 문자열 스트림 만들기
+  Stream<String> emptyStream = Stream.empty(); // 스트림 비우기
+  ```
+  자바 9에서 null이 될 수 있는 객체를 스트림으로 만들 수 있는 새로운 메서드가 추가되었다.
+  **ofNullable** 메서드는 객체가 null일 경우 빈 스트림으로 만든다.
+  ```java
+  Stream<String> homeValueStream = Stream.ofNullable(System.getProperty("home"));
+  ```
+  여기서 System.getProperty는 자바가 실행되는 곳과 운영체제 정보를 알아낼 때 사용하는 메서드이다.
+  System.getProperty는 제공된 키에 대응하는 속성이 없으면 null을 반환한다.
+
+- 배열로 스트림 만들기
+  배열을 인수로 받는 정적 메서드 Arrays.stream을 이용해서 스트림을 만들 수 있다.
+  예를 들어 기본형 int로 이루어진 배열을 IntStream으로 변환한다.
+
+- 파일로 스트림 만들기
+  파일을 처리하는 등의 I/O 연산에 사용하는 자바의 NIO API(비블록 I/O)는 스트림 API를 사용할 수 있다.
+  예를 java.nio.file.Files의 정적 메서드, Files.lines는 주어진 파일의 각 행 요소를 문자열 스트림(Stream<String\>)으로 반환한다.
+  
+  스트림의 소스가 I/O 자원이므로 메모리 누수를 막으려면 자원을 닫아야 한다. 
+  하지만 Stream 인터페이스는 AutoCloseable 인터페이스를 구현한다. 따라서 I/O 자원은 자동으로 관리된다. 
+
+### 7.2. 무한 스트림 - iterate, generator
+스트림 API는 함수에서 스트림을 만들 수 있는 두 정적 메서드 Stream.iterate와 Stream.generator를 제공한다.
+두 연산을 이용해서 크기가 고정되지 않는 스트림, **무한 스트림**을 만들 수 있다.
+
+먼저 iterate을 살펴보면, iterate 메서드는 초깃값과 람다(UnaryOperator<T\>를 사용)를 인수로 받아서 새로운 값을 끊임없이 생산할 수 있다.
+```java
+Stream.iterate(0, n -> n + 2)
+    .limit(10)
+    .forEach(System.out::println);
+```
+위 코드는 짝수를 무한히 생성하고 있다. 
+iterate는 요청할 때마다 값을 생산할 수 있으며 끝이 없으므로 무한 스트림을 만든다.
+이러한 스트림을 **언 바운드 스트림(unbounded stream)**이라고 표현한다. 이러한 특징이 스트림과 컬렉션의 큰 차이점이다.
+
+그리고 자바 9은 iterate 메서드는 프레디케이트를 지원한다.
+iterate는 두 번째 인수로 프레디케이트를 받아 언제까지 작업을 수행할 것인지 기준으로 사용한다.
+아래는 100 이하의 4의 배수를 생산하는 코드이다. 
+```java
+IntStream.iterate(0, n -> n < 100, n -> n + 4)
+        .forEach(System.out::println);
+```
+
+다음으로 generate는 iterate과 달리 생산된 각 값을 연속적으로 계산하지 않는다.
+generate는 Supplier<T\>를 인수로 받아서 새로운 값을 생산한다.
+
+아래는 0에서 1 사이의 임의의 double 숫자 다섯 개를 만드는 코드이다. 
+```java
+Stream.generate(Math::random)
+    .limit(5)
+    .forEach(System.out::println);
+```
+
+iterate와 generator의 예제에서 두 메서드의 차이를 확인할 수 있다.
+iterate는 기존 결과에 의존해서 순차적으로 연산을 수행한다. 
+따라서 나중에 계산에 사용할 어떠한 값이 있어야 하므로 상태가 있는 연산이다.
+
+반대로 generator의 Supplier은 나중에 계산에 사용할 어떤 값도 저장해두지 않는다.
+따라서 상태가 없는 메서드이다. 
+물론 발행자, Supplier에 상태를 저장하여 다음에 스트림의 다음 값을 만들 때 상태를 고칠 수 있다.
+(modern_java_in_action.chap05.Fibonacci 참고)
+
+하지만 가변 상태 객체는 병렬 코드에서 안전하지 않음을 1장(modern_java_in_action.chap01 2.3)에서 설명했다.
+iterate의 경우 각 과정에서 새로운 값을 생성하면서도 기존 상태를 바꾸지 않는 **순수한 불변상태**를 유지한다. 
+
+결론은 스트림을 병렬로 처리하면서 올바른 결과를 얻으려면 **불변 상태 기법**을 사용해야 한다.
+
+그리고 무한한 크기를 가진 스트림을 처리할 때는 limit를 이용해서 명시적으로 스트림의 크기를 제한해야 한다.
+마찬가지로 무한 스트림의 요소는 무한적으로 계산이 반복되므로 정렬하거나 리듀스할 수 없다.
+
+---
+💡 **Key word**
+
+다양한 스트림 연산, 쇼트서킷, 상태 없는 연산, 상태 있는 연산, 기본형 특화 스트림, 무한 스트림

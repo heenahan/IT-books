@@ -1,4 +1,4 @@
-package chap04;
+package modern_java_in_action.chap04;
 
 public class Dish { // 불변형 클래스
 	private final String name;

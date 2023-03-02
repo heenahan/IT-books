@@ -1,4 +1,4 @@
-package chap03;
+package modern_java_in_action.chap03;
 
 import java.util.ArrayList;
 import java.util.Comparator;
