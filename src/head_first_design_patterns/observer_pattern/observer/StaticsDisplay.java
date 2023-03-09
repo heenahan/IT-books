@@ -1,8 +1,8 @@
 package head_first_design_patterns.observer_pattern.observer;
 
-import observer_pattern.display.Display;
-import observer_pattern.subject.Subject;
-import observer_pattern.subject.WeatherData;
+import head_first_design_patterns.observer_pattern.display.Display;
+import head_first_design_patterns.observer_pattern.subject.Subject;
+import head_first_design_patterns.observer_pattern.subject.WeatherData;
 
 public class StaticsDisplay implements Observer, Display {
 	

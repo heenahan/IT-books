@@ -1,6 +1,6 @@
 package head_first_design_patterns.observer_pattern.subject;
 
-import observer_pattern.observer.Observer;
+import head_first_design_patterns.observer_pattern.observer.Observer;
 
 public interface Subject {
 	

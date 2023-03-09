@@ -1,9 +1,9 @@
 package head_first_design_patterns.observer_pattern;
 
-import observer_pattern.observer.CurrentConditionsDisplay;
-import observer_pattern.observer.Observer;
-import observer_pattern.observer.StaticsDisplay;
-import observer_pattern.subject.WeatherData;
+import head_first_design_patterns.observer_pattern.observer.CurrentConditionsDisplay;
+import head_first_design_patterns.observer_pattern.observer.Observer;
+import head_first_design_patterns.observer_pattern.observer.StaticsDisplay;
+import head_first_design_patterns.observer_pattern.subject.WeatherData;
 
 public class Main {
 	
